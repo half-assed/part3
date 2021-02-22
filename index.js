@@ -31,6 +31,22 @@ let persons = [
           "id": 4
         }
 ]
+// 3.5
+app.post('/api/persons', (request, response) => {
+  const newPerson = {
+      name: request.body.name,
+      number: request.body.number,
+      id: Math.round(Math.random()*10000)
+  }
+  // 3.6
+  if (newPerson.name !== "" && newPerson.number !== "" && !persons.find(person => person.name === newPerson.name)) {
+      persons = persons.concat(newPerson)
+      response.json(newPerson)
+  }
+  else
+      response.status(400).send( { error: 'name must be unique' } )
+
+})
 
 // 3.1
 app.get('/api/persons', (request, response) => {
@@ -55,23 +71,6 @@ app.get('/api/persons/:id', (request, response) => {
 app.delete('/api/persons/:id', (request, response) => {
     persons = persons.filter(person => person.id !== Number(request.params.id))
     response.status(202).end()
-})
-
-// 3.5
-app.post('/api/persons', (request, response) => {
-    const newPerson = {
-        name: request.body.name,
-        number: request.body.number,
-        id: Math.round(Math.random()*10000)
-    }
-    // 3.6
-    if (newPerson.name !== "" && newPerson.number !== "" && !persons.find(person => person.name === newPerson.name)) {
-        persons = persons.concat(newPerson)
-        response.json(newPerson)
-    }
-    else
-        response.status(400).send( { error: 'name must be unique' } )
-
 })
 
 const PORT = process.env.PORT || 3001
