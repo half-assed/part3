@@ -1,6 +1,7 @@
+// to run file: node mongo.js in appropriate directory.
 require('dotenv').config()
 // import the database configuration. Connects and returns mongoose.model('Person', personSchema)
-const Person = require('./models/Person')   
+const Person = require('./models/person')   
 const mongoose = require('mongoose')        // required for closing connection
 
 

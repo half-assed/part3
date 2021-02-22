@@ -1,56 +1,48 @@
+require('dotenv').config()
+const Person = require("./models/person")
 const express = require('express')
 const app = express()
-const morgan = require('morgan')
+// const morgan = require('morgan')
+const mongoose = require('mongoose')
 
 app.use(express.json())
-app.use(express.static('build'))
+app.use(express.static('build'))      // frontend build
 
 // 3.8
-morgan.token('data', function(req, res) { return JSON.stringify(req.body) })
-app.use(morgan(':method :url :status :res[content-length] - :response-time ms :data'))
+/* morgan.token('data', function(req, res) { return JSON.stringify(req.body) })
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :data')) */
 
-let persons = [
-        { 
-          "name": "Arto Hellas", 
-          "number": "040-123456",
-          "id": 1
-        },
-        { 
-          "name": "Ada Lovelace", 
-          "number": "39-44-5323523",
-          "id": 2
-        },
-        { 
-          "name": "Dan Abramov", 
-          "number": "12-43-234345",
-          "id": 3
-        },
-        { 
-          "name": "Mary Poppendieck", 
-          "number": "39-23-6423122",
-          "id": 4
-        }
-]
 // 3.5
 app.post('/api/persons', (request, response) => {
-  const newPerson = {
+  console.log(">>> Post - /api/persons")
+  const newPerson = new Person({
       name: request.body.name,
       number: request.body.number,
-      id: Math.round(Math.random()*10000)
-  }
-  // 3.6
-  if (newPerson.name !== "" && newPerson.number !== "" && !persons.find(person => person.name === newPerson.name)) {
-      persons = persons.concat(newPerson)
-      response.json(newPerson)
+  })
+  // 3.14
+  if (newPerson.name !== "" || newPerson.number !== "") {
+      newPerson.save().then(result => {
+        console.log("Save: ", result)
+        // mongoose.connection.close()
+      }).catch(error => {
+        console.log(">>>ERROR<<< Saving failed: \n", error)
+      })
   }
   else
       response.status(400).send( { error: 'name must be unique' } )
-
 })
 
-// 3.1
+// 3.13
 app.get('/api/persons', (request, response) => {
-  response.json(persons)
+  console.log(">>> GET - /api/persons")
+  Person.find({}).then(result => {
+    response.json(result)
+    //mongoose.connection.close()
+  })
+  .catch(error => {
+    console.log(">>> ERROR <<<", error)
+  })
+
 })
 
 // 3.2
@@ -75,5 +67,5 @@ app.delete('/api/persons/:id', (request, response) => {
 
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
+  console.log(`-----Server running on port ${PORT}-----`)
 })
