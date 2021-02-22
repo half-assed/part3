@@ -14,7 +14,7 @@ app.use(morgan(':method :url :status :res[content-length] - :response-time ms :d
 
 // 3.5
 app.post('/api/persons', (request, response) => {
-  console.log(">>> Post - /api/persons")
+  console.log(">>> POST - /api/persons")
   const newPerson = new Person({
       name: request.body.name,
       number: request.body.number,
@@ -23,7 +23,7 @@ app.post('/api/persons', (request, response) => {
   if (newPerson.name !== "" || newPerson.number !== "") {
       newPerson.save().then(result => {
         console.log("Save: ", result)
-        // mongoose.connection.close()
+        response.json(result)
       }).catch(error => {
         console.log(">>>ERROR<<< Saving failed: \n", error)
       })
@@ -37,7 +37,6 @@ app.get('/api/persons', (request, response) => {
   console.log(">>> GET - /api/persons")
   Person.find({}).then(result => {
     response.json(result)
-    //mongoose.connection.close()
   })
   .catch(error => {
     console.log(">>> ERROR <<<", error)
