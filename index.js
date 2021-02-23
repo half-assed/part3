@@ -61,11 +61,10 @@ app.get('/api/persons/:id', (request, response) => {
 
 // 3.4
 app.delete('/api/persons/:id', (request, response, next) => {
-  person.findByIdAndDelete(request.params.id).then(response => {
+  console.log(">>> DELETE - /api/persons")
+  person.findByIdAndDelete(request.params.id).then(result => {
     response.status(204).end()
-  })
-  /*persons = persons.filter(person => person.id !== Number(request.params.id))
-    response.status(202).end() */
+  }).catch(error => {console.log(">>>ERROR<<<", error)})
 })
 
 const PORT = process.env.PORT || 3001
