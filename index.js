@@ -4,6 +4,7 @@ const express = require('express')
 const app = express()
 // const morgan = require('morgan')
 const mongoose = require('mongoose')
+const person = require('./models/person')
 
 app.use(express.json())
 app.use(express.static('build'))      // frontend build
@@ -59,9 +60,12 @@ app.get('/api/persons/:id', (request, response) => {
 })
 
 // 3.4
-app.delete('/api/persons/:id', (request, response) => {
-    persons = persons.filter(person => person.id !== Number(request.params.id))
-    response.status(202).end()
+app.delete('/api/persons/:id', (request, response, next) => {
+  person.findByIdAndDelete(request.params.id).then(response => {
+    response.status(204).end()
+  })
+  /*persons = persons.filter(person => person.id !== Number(request.params.id))
+    response.status(202).end() */
 })
 
 const PORT = process.env.PORT || 3001
