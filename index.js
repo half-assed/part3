@@ -1,11 +1,8 @@
 require('dotenv').config()
-const Person = require("./models/person")
+const Person = require('./models/person')
 const express = require('express')
 const app = express()
-// const morgan = require('morgan')
-const mongoose = require('mongoose')
-const person = require('./models/person')
-
+const morgan = require('morgan')
 app.use(express.json())
 app.use(express.static('build'))      // frontend build
 
@@ -16,19 +13,43 @@ app.use(morgan(':method :url :status :res[content-length] - :response-time ms :d
 // 3.5
 app.post('/api/persons', (request, response, next) => {
   console.log(">>> POST - /api/persons")
-  const newPerson = new Person({
-      name: request.body.name,
-      number: request.body.number,
-  })
-  // 3.14
-  if (newPerson.name !== "" || newPerson.number !== "") {
+  //console.log("request", typeof request.body.name)
+  // wouldn't work until request.body.name is put inside of `${}`, fucking unbelievable...
+  Person.find({name: `${request.body.name}`}).then(result => {
+    console.log("Result", result)
+    if(result.length > 0) {
+      console.log("Person exists in phonebook: ")
+      response.status(400).send({ error: 'name must be unique' })
+    }
+    //else if (request.body.name !== "" && request.body.number !== "") {
+    else {
+      const newPerson = new Person({
+        name: request.body.name,
+        number: request.body.number
+      })
+      console.log("newPerson:", newPerson.name, newPerson.number)
       newPerson.save().then(result => {
         console.log("Save: ", result)
         response.json(result)
       }).catch(error => next(error))
+    }
+  })
+})
+
+app.put('/api/persons/:id', (request, response, next) => {
+  console.log(`>>> PUT - /api/persons/${request.params.id}`)
+  // const newPerson = new Person --- will not work!!! new Person will already be an object created by the model, and the findByIdAndUpdate method takes plain JS objects!!!
+  const placeholderPerson = {
+      number: request.body.number
   }
-  else
-      response.status(400).send( { error: 'name must be unique' } )
+  // search person from database
+  Person.find({}).then(result => {
+    Person.findByIdAndUpdate(request.params.id, placeholderPerson, {new: true})
+    .then(updatedPerson => {
+      console.log("response.json")
+      return response.json(updatedPerson)
+    }).catch(error => next(error))
+  })
 })
 
 // 3.13
@@ -43,8 +64,8 @@ app.get('/api/persons', (request, response, next) => {
 
 // 3.2
 app.get('/info', (request, response) => {
-    response.send(`<p>Phonebook has info for ${persons.length} people</p><p>${new Date()}`)
-})
+    Person.countDocuments({}).then(result => {response.send(`<p>Phonebook has info for ${result} people</p><p>${new Date()}`)}
+)})
 
 // 3.3
 app.get('/api/persons/:id', (request, response, next) => {
@@ -65,7 +86,7 @@ app.get('/api/persons/:id', (request, response, next) => {
 // 3.4
 app.delete('/api/persons/:id', (request, response, next) => {
   console.log(">>> DELETE - /api/persons")
-  person.findByIdAndDelete(request.params.id).then(result => {
+  Person.findByIdAndDelete(request.params.id).then(result => {
     response.status(204).end()
   }).catch(error => next(error))
 })
@@ -75,6 +96,9 @@ const errorHandler = (error, request, response, next) => {
   console.error(error.message)
   if (error.name === 'CastError') {
     return response.status(400).send({ error: 'malformatted id' })
+  }
+  else if(error.name === 'ValidationError') {
+    return response.status(500).send({error: `${error}`})
   }
   next(error)
 }

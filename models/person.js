@@ -19,13 +19,19 @@ mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true, useFind
     console.log('failed to connect to MongoDB. Error: ', error.message)
 })
 
-
 // defining database schema
 const personSchema = new mongoose.Schema({
-    name: String,
-    number: String
-  })
-
+    name: {
+        type: String,
+        minlength: 3,
+        required: true
+    },
+    number: {
+        type: String,
+        minlength: 8,
+        required: true
+    }
+})
 
 // defining the JSON.stringify functionality
 personSchema.set('toJSON', {
@@ -35,7 +41,6 @@ personSchema.set('toJSON', {
         delete returnedObject.__v
     }
 })
-
 
 // exporting
 module.exports = mongoose.model('Person', personSchema)
