@@ -11,13 +11,15 @@
     "morgan": "^1.10.0"
   },
   "devDependencies": {
+    "eslint": "^7.20.0",
     "nodemon": "^2.0.7"
   },
   "scripts": {
     "dev": "nodemon index.js",
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "scriptbuild": "rm -rf build && cd ../FullStackWithCorrectIgnore/Part2/phonebook && npm run build && cp -r build ../../../part3"
+    "scriptbuild": "rm -rf build && cd ../FullStackWithCorrectIgnore/Part2/phonebook && npm run build && cp -r build ../../../part3",
+    "lint": "eslint ."
   },
   "repository": {
     "type": "git",
